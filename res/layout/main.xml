@@ -4,7 +4,7 @@
     android:layout_height="fill_parent"
     android:orientation="vertical" >
 
-<ChessboardView android:id="@+id/chessboard"
+<com.onezeros.chinesechess.ChessboardView android:id="@+id/chessboard"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
     android:layout_gravity="center"

@@ -12,22 +12,19 @@ import android.graphics.Picture;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageView;
 
-public class ChessboardView extends ImageView{
+public class ChessboardView extends View{
 	Bitmap[][] mChessBitmaps = new Bitmap[2][7];
-	int mLaticeLen ;
+	int mLaticeLen = -1 ;
 	int mLaticeLen2;
 	int mChesslen ;
 	int mChessLen2;
 	AI mAi = new AI();
-	
-	public ChessboardView(Context context, AttributeSet attrs, int defStyle) {
-		super(context, attrs, defStyle);
-		init(context);
-	}
+
 
 	public ChessboardView(Context context, AttributeSet attrs) {
 		super(context, attrs);
@@ -40,24 +37,15 @@ public class ChessboardView extends ImageView{
 	}
 
 	void init(Context context){
-		mLaticeLen = getWidth()/9;
-		mChesslen = mLaticeLen * 19  / 20;
-		mLaticeLen2 = mLaticeLen/2;
-		mChessLen2 = mChesslen /2;
-		
-        // load chess images
-        Bitmap chessBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.qp1);
-        int stepH = chessBitmap.getHeight() / 3;
-        int stepW = chessBitmap.getWidth() / 14;
-        for (int i = 0; i < 7; i++) {
-			mChessBitmaps[0][i] = Bitmap.createBitmap(chessBitmap, i * stepW, 0, stepW, stepH);
-			mChessBitmaps[1][i] = Bitmap.createBitmap(chessBitmap, i * stepW, 0, stepW, stepH);
-		}
+		mAi.init();
 	}
+	
 	private Point chessIndex2CanvasCoord(int i) {
 		Point point = chessIndex2LogicPoint(i);
-		point.x *= mLaticeLen + mLaticeLen2;
-		point.y *= mLaticeLen + mLaticeLen2;
+		point.x *= mLaticeLen ;
+		point.x += mLaticeLen2;
+		point.y *= mLaticeLen ;
+		point.y += mLaticeLen2;
 		return point;
 	}
 	private Point chessIndex2LogicPoint(int i) {
@@ -66,15 +54,42 @@ public class ChessboardView extends ImageView{
 	
 	@Override
 	protected void onDraw(Canvas canvas) {
+		if (mLaticeLen <0) {
+
+			mLaticeLen = getWidth()/9;
+			mChesslen = mLaticeLen * 19  / 20;
+			mLaticeLen2 = mLaticeLen/2;
+			mChessLen2 = mChesslen /2;
+			
+	        // load chess images
+	        Bitmap chessBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.qz);
+	        int stepH = chessBitmap.getHeight() / 3;
+	        int stepW = chessBitmap.getWidth() / 14;
+	        for (int i = 0; i < 7; i++) {
+				mChessBitmaps[0][i] = Bitmap.createBitmap(chessBitmap, i * stepW, 0, stepW, stepH);
+				mChessBitmaps[1][i] = Bitmap.createBitmap(chessBitmap, (i+7) * stepW, 0, stepW, stepH);
+			}
+	        chessBitmap = mChessBitmaps[0][0];
+	        mChessBitmaps[0][0] = mChessBitmaps[0][6];
+	        mChessBitmaps[0][6] = chessBitmap;
+	        chessBitmap = mChessBitmaps[1][0];
+	        mChessBitmaps[1][0] = mChessBitmaps[1][6];
+	        mChessBitmaps[1][6] = chessBitmap;
+	        chessBitmap = mChessBitmaps[0][4];
+	        mChessBitmaps[0][4] = mChessBitmaps[0][5];
+	        mChessBitmaps[0][5] = chessBitmap;
+	        chessBitmap = mChessBitmaps[1][4];
+	        mChessBitmaps[1][4] = mChessBitmaps[1][5];
+	        mChessBitmaps[1][5] = chessBitmap;
+		}
 		// draw each chess
-//		for(int i =0 ; i < 90 ; i++) {
-//			if (mAi.piece[i] != mAi.EMPTY) {
-//				Point point = chessIndex2CanvasCoord(i);
-//				Bitmap bmp = mChessBitmaps[mAi.color[i]][mAi.piece[i]];
-//				canvas.drawBitmap(bmp, new Rect(0,0,bmp.getWidth(),bmp.getHeight()), 
-//						new Rect(point.x - mChessLen2, point.y - mChessLen2, mChesslen,mChesslen), new Paint());
-//			}
-//		}
+		for(int i =0 ; i < AI.BOARD_SIZE ; i++) {
+			if (mAi.piece[i] != AI.EMPTY) {
+				Point point = chessIndex2CanvasCoord(i);
+				Bitmap bmp = mChessBitmaps[mAi.color[i]][mAi.piece[i]];
+				canvas.drawBitmap(bmp, null,new Rect(point.x - mChessLen2, point.y - mChessLen2, point.x + mChessLen2, point.y + mChessLen2), null);
+			}
+		}
 		super.onDraw(canvas);
 	}
 
