@@ -1,7 +1,10 @@
 package com.onezeros.chinesechess;
 
+import android.util.Log;
+
 
 public class AI {
+	public static final int MAX_PLY = 4;
 	public static final int SIZE_X = 9;
 	public static final int SIZE_Y = 10;
 	public static final int BOARD_SIZE = SIZE_X*SIZE_Y;
@@ -25,18 +28,31 @@ public class AI {
 	public static final int NORMAL = 0;
 	public static final int SELECT = 1;
 
+	// result of a move
+	public static final int MOVE_WIN = 1;
+	public static final int MOVE_INVALID = 2;
+	public static final int MOVE_OK = 3;
 
 	class Move {
-		int from, dest;
+		public int from;
+		public int dest;
 	};
 
 	class Recorder {
-		Move m;
+		public Move m ;
+		public Recorder() {
+			m = new Move();
+		}
+		
 	};
 
 	class History {
-		Move m;
-		int capture;
+		public Move m ;
+		public int capture;
+
+		public History() {
+			m = new Move();
+		}
 	} ;
 	
 	/* the board representation && the initial board state */
@@ -48,69 +64,70 @@ public class AI {
 	/* For getting information */
 	int nodecount, brandtotal = 0, gencount = 0;
 	int ply, side, xside, computerside;
-	Move newmove;
-	Recorder[] gen_dat = new Recorder[MOVE_STACK];//record moved steps
+	Move newmove = new Move();
+	Recorder[] gen_dat ;//record moved steps
 	//store possible moves indexs in gen_data for  current situation
 	int[] gen_begin = new int[HIST_STACK];
 	int[] gen_end = new int[HIST_STACK];
-	History[] hist_dat = new History[HIST_STACK];//history data
+	History[] hist_dat ;//history data
 	int hdp;
 
 
 	/**** MOVE GENERATE ****/
-	final int[][] offset = //[7][8] possible positions offset
-	{{-1, 1,13, 0, 0, 0, 0, 0}, /* PAWN {for DARK side} */
-	{-12,-14,12,14,0,0,0,0}, /* BISHOP */
-	{-28,-24,24,28, 0, 0, 0, 0 }, /* ELEPHAN */
-	{-11,-15,-25,-27,11,15,25,27}, /* KNIGHT */
-	{-1, 1,-13,13, 0, 0, 0, 0}, /* CANNON */
-	{-1, 1,-13,13, 0, 0, 0, 0}, /* ROOK */
-	{-1, 1,-13,13, 0, 0, 0, 0}/* KING */
+	//[7][8] possible positions offset
+	final int[][] offset = {
+			{-1, 1,13, 0, 0, 0, 0, 0}, /* PAWN {for DARK side} */
+			{-12,-14,12,14,0,0,0,0}, /* BISHOP */
+			{-28,-24,24,28, 0, 0, 0, 0 }, /* ELEPHAN */
+			{-11,-15,-25,-27,11,15,25,27}, /* KNIGHT */
+			{-1, 1,-13,13, 0, 0, 0, 0}, /* CANNON */
+			{-1, 1,-13,13, 0, 0, 0, 0}, /* ROOK */
+			{-1, 1,-13,13, 0, 0, 0, 0}/* KING */
 	}; 
 
 	//14*13,10*9
-	final int[] mailbox182 = 
-	{-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
-	-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
-	-1,-1, 0, 1, 2, 3, 4, 5, 6, 7, 8,-1,-1,
-	-1,-1, 9,10,11,12,13,14,15,16,17,-1,-1,
-	-1,-1,18,19,20,21,22,23,24,25,26,-1,-1,
-	-1,-1,27,28,29,30,31,32,33,34,35,-1,-1,
-	-1,-1,36,37,38,39,40,41,42,43,44,-1,-1,
-	-1,-1,45,46,47,48,49,50,51,52,53,-1,-1,
-	-1,-1,54,55,56,57,58,59,60,61,62,-1,-1,
-	-1,-1,63,64,65,66,67,68,69,70,71,-1,-1,
-	-1,-1,72,73,74,75,76,77,78,79,80,-1,-1,
-	-1,-1,81,82,83,84,85,86,87,88,89,-1,-1,
-	-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
-	-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1
+	final int[] mailbox182 = {
+			-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+			-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+			-1,-1, 0, 1, 2, 3, 4, 5, 6, 7, 8,-1,-1,
+			-1,-1, 9,10,11,12,13,14,15,16,17,-1,-1,
+			-1,-1,18,19,20,21,22,23,24,25,26,-1,-1,
+			-1,-1,27,28,29,30,31,32,33,34,35,-1,-1,
+			-1,-1,36,37,38,39,40,41,42,43,44,-1,-1,
+			-1,-1,45,46,47,48,49,50,51,52,53,-1,-1,
+			-1,-1,54,55,56,57,58,59,60,61,62,-1,-1,
+			-1,-1,63,64,65,66,67,68,69,70,71,-1,-1,
+			-1,-1,72,73,74,75,76,77,78,79,80,-1,-1,
+			-1,-1,81,82,83,84,85,86,87,88,89,-1,-1,
+			-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+			-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1
 	};
 
-	//positions in mailbox182
-	final int[] mailbox90 =//10*9
-	{28, 29, 30, 31, 32, 33, 34, 35, 36,//+5
-	41, 42, 43, 44, 45, 46, 47, 48, 49,
-	54, 55, 56, 57, 58, 59, 60, 61, 62,
-	67, 68, 69, 70, 71, 72, 73, 74, 75,
-	80, 81, 82, 83, 84, 85, 86, 87, 88,
-	93, 94, 95, 96, 97, 98, 99,100,101,
-	106, 107,108,109,110,111,112,113,114,
-	119, 120,121,122,123,124,125,126,127,
-	132, 133,134,135,136,137,138,139,140,
-	145, 146,147,148,149,150,151,152,153
+	//positions in mailbox182 10*9
+	final int[] mailbox90 = {
+			28, 29, 30, 31, 32, 33, 34, 35, 36,//+5
+			41, 42, 43, 44, 45, 46, 47, 48, 49,
+			54, 55, 56, 57, 58, 59, 60, 61, 62,
+			67, 68, 69, 70, 71, 72, 73, 74, 75,
+			80, 81, 82, 83, 84, 85, 86, 87, 88,
+			93, 94, 95, 96, 97, 98, 99,100,101,
+			106, 107,108,109,110,111,112,113,114,
+			119, 120,121,122,123,124,125,126,127,
+			132, 133,134,135,136,137,138,139,140,
+			145, 146,147,148,149,150,151,152,153
 	};
 
-	final int[] legalposition =
-	{1, 1, 5, 3, 3, 3, 5, 1, 1,
-	1, 1, 1, 3, 3, 3, 1, 1, 1,
-	5, 1, 1, 3, 7, 3, 1, 1, 5,
-	1, 1, 1, 1, 1, 1, 1, 1, 1,
-	9, 1,13, 1, 9, 1,13, 1, 9,
-	9, 9, 9, 9, 9, 9, 9, 9, 9,
-	9, 9, 9, 9, 9, 9, 9, 9, 9,
-	9, 9, 9, 9, 9, 9, 9, 9, 9,
-	9, 9, 9, 9, 9, 9, 9, 9, 9,
-	9, 9, 9, 9, 9, 9, 9, 9, 9
+	final int[] legalposition = {
+			1, 1, 5, 3, 3, 3, 5, 1, 1,
+			1, 1, 1, 3, 3, 3, 1, 1, 1,
+			5, 1, 1, 3, 7, 3, 1, 1, 5,
+			1, 1, 1, 1, 1, 1, 1, 1, 1,
+			9, 1,13, 1, 9, 1,13, 1, 9,
+			9, 9, 9, 9, 9, 9, 9, 9, 9,
+			9, 9, 9, 9, 9, 9, 9, 9, 9,
+			9, 9, 9, 9, 9, 9, 9, 9, 9,
+			9, 9, 9, 9, 9, 9, 9, 9, 9,
+			9, 9, 9, 9, 9, 9, 9, 9, 9
 	};
 
 	final int[] maskpiece = {8, 2, 4, 1, 1, 1, 2};
@@ -118,7 +135,17 @@ public class AI {
 	final int[] elephancheck = {-10,-8,8,10,0,0,0,0};
 	final int[] kingpalace = {3,4,5,12,13,14,21,22,23};//possible positions for computer side
 
-
+	
+	public AI() {
+		gen_dat = new Recorder[MOVE_STACK];
+		for (int i = 0; i < gen_dat.length; i++) {
+			gen_dat[i] = new Recorder();
+		}
+		hist_dat = new History[HIST_STACK];
+		for (int i = 0; i < hist_dat.length; i++) {
+			hist_dat[i] = new History(); 
+		}
+	}
 	public void init() {
 		gen_begin[0] = 0; 
 		ply = 0; 
@@ -151,8 +178,8 @@ public class AI {
 			7, 7, 7, 7, 7, 7, 7, 7, 7,
 			5, 3, 2, 1, 6, 1, 2, 3, 5
 		};
-		color = clr;
-		piece = pc;
+		System.arraycopy(clr, 0, color, 0, clr.length);
+		System.arraycopy(pc, 0, piece, 0, pc.length);
 	}
 	//check whether computer's King will be killed by opponent's King directly
 	// after computer moves King,
@@ -166,7 +193,7 @@ public class AI {
 			i = 0;
 			for (k=kingpalace[i]; piece[k]!=KING; k++) ;
 			for (k += SIZE_X; k<BOARD_SIZE && piece[k]==EMPTY; k += SIZE_X);
-			if (piece[k]==KING) r = 1;
+			if ( k<BOARD_SIZE && piece[k]==KING) r = 1;
 			piece[from] = piece[dest]; piece[dest] = t;//unmove
 		}
 		return r;
@@ -174,7 +201,7 @@ public class AI {
 	//save a possible move
 	public void pushGeneratedMove(int from, int dest)
 	{
-		if (kingFace(from, dest) != 0)
+		if (kingFace(from, dest) == 0)
 		{
 			gen_dat[gen_end[ply]].m.from = from;
 			gen_dat[gen_end[ply]].m.dest = dest;
@@ -195,7 +222,7 @@ public class AI {
 				p = piece[i];//piece kind
 				for (j=0; j<8; j++)
 				{
-					if (offset[p][j] != 0) break;//find possible next position
+					if (offset[p][j] == 0) break;//find possible next position
 					x = mailbox90[i]; //offset in mailbox128
 					fcannon = 0;
 					if (p==ROOK || p==CANNON) n = 9; else n = 1;//
@@ -210,8 +237,7 @@ public class AI {
 						//according which side the piece is 
 						if (side == DARK) t = y; else t = 89-y;
 						if (y==-1 || (legalposition[t] & maskpiece[p])==0) break;
-
-						if (fcannon != 0)
+						if (fcannon == 0)
 						{
 							if (color[y]!=side)
 								switch (p)
@@ -239,14 +265,16 @@ public class AI {
 		brandtotal += gen_end[ply] - gen_begin[ply]; gencount++;
 	}
 
-
 	/***** MOVE *****/
 	public boolean move(Move m)
 	{
 		int from, dest, p;
 		nodecount++;
-		from = m.from; dest = m.dest;
-		hist_dat[hdp].m = m; hist_dat[hdp].capture = p = piece[dest];
+		from = m.from;
+		dest = m.dest;
+		hist_dat[hdp].m.from = m.from;
+		hist_dat[hdp].m.dest = m.dest;
+		hist_dat[hdp].capture = p = piece[dest];
 		piece[dest] = piece[from]; piece[from] = EMPTY;
 		color[dest] = color[from]; color[from] = EMPTY;
 		hdp++; ply++; side = xside; xside = 1-xside;
@@ -285,7 +313,7 @@ public class AI {
 	{
 		int i, value, best;
 
-		if (depth != 0) return eval();
+		if (depth == 0) return eval();
 
 		generateMoves();
 		best = -INFINITY;
@@ -300,7 +328,11 @@ public class AI {
 
 			if (value > best)
 			{
-				best = value; if (ply != 0) newmove = gen_dat[i].m;
+				best = value; 
+				if (ply == 0) {
+					newmove.from = gen_dat[i].m.from;
+					newmove.dest = gen_dat[i].m.dest;
+				}
 			}
 		}
 
@@ -314,5 +346,38 @@ public class AI {
 		piece[dest] = piece[from]; piece[from] = EMPTY;
 		color[dest] = color[from]; color[from] = EMPTY;	
 		return p == KING;
+	}
+	
+	// 
+	public int takeAMove(int from , int to) {
+		generateMoves();
+		newmove.from = from; 
+		newmove.dest = to;
+		int ret = MOVE_INVALID;
+		for (int i=gen_begin[ply]; i<gen_end[ply]; i++){
+			if (gen_dat[i].m.from==newmove.from && gen_dat[i].m.dest==newmove.dest){
+				if(updateNewMove()){
+					return MOVE_WIN;
+				}
+				ret = MOVE_OK;
+				side = xside; xside = 1-xside;
+
+				break;
+			}
+		}
+		return ret;
+	}
+
+	public int computerMove() {
+		//computer move
+		alphabeta(-INFINITY, INFINITY, MAX_PLY);
+		if(updateNewMove()){
+			return MOVE_WIN;
+		}
+		side = xside; xside = 1-xside;
+		return MOVE_OK;
+	}
+	public Move getComputerMove() {
+		return newmove;
 	}
 }
