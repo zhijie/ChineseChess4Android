@@ -27,6 +27,8 @@
         </activity>
         <activity android:name="cn.domob.android.ads.DomobActivity"
             android:theme="@android:style/Theme.Translucent"></activity>
+    <meta-data android:value="4fe975865270157a8100000d" android:name="UMENG_APPKEY"></meta-data>
+    <meta-data android:value="Channel ID" android:name="UMENG_CHANNEL"/>
     </application>
 
 </manifest>
