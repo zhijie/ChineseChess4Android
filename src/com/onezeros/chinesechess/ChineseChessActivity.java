@@ -15,8 +15,8 @@ public class ChineseChessActivity extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
-        
-     // domob ad
+
+        // domob ad
         LinearLayout layout = (LinearLayout)findViewById(R.id.AdLinearLayout);
         DomobAdView adView = new DomobAdView(this,"56OJyOeouMzH2P6sIM",DomobAdView.INLINE_SIZE_320X50);
         layout.addView(adView);
@@ -33,5 +33,4 @@ public class ChineseChessActivity extends Activity {
 		super.onResume();
 		MobclickAgent.onPause(this);
 	}
-    
 }

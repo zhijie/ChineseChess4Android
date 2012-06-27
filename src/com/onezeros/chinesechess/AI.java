@@ -1,7 +1,10 @@
 package com.onezeros.chinesechess;
 
-import android.util.Log;
-
+/**
+ * algorithm from feiyan
+ * @author onezeros
+ *
+ */
 
 public class AI {
 	public static final int MAX_PLY = 4;

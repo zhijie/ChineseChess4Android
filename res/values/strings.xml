@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">ChineseChess</string>
-
+	<string name="computer_win">Hiahia, I win. dare to try again ?</string>
+	<string name="user_win">You are really lucky, dare to try again ?</string>
 </resources>

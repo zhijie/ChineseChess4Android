@@ -1,9 +1,12 @@
 package com.onezeros.chinesechess;
 
+
 import com.android.chinesechess.R;
 import com.onezeros.chinesechess.AI.Move;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -30,9 +33,17 @@ public class ChessboardView extends ImageView{
 	float mChessLen2;
 	int mChessFrom = -1;
 	int mChessTo = -1;
+	float mStartBoardX;
+	float mStartBoardY;
+	boolean mIsComputerThinking =false;
+	// back up of ai status for drawing
+	int[] mPieces = new int[AI.BOARD_SIZE];
+	int[] mColors = new int[AI.BOARD_SIZE];
 	
 	AI mAi = new AI();
 	MessageHandler mMessageHandler = new MessageHandler();
+	Context mContext;
+	AlertDialog.Builder mAlertDialogBuilder;
 
 	public ChessboardView(Context context, AttributeSet attrs) {
 		super(context, attrs);
@@ -45,7 +56,22 @@ public class ChessboardView extends ImageView{
 	}
 
 	void init(Context context){
-		mAi.init();
+		mContext = context;
+		
+		mAlertDialogBuilder = new AlertDialog.Builder(mContext);
+		mAlertDialogBuilder.setCancelable(false)
+		       .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+		           public void onClick(DialogInterface dialog, int id) {
+		                newGame();
+		           }
+		       })
+		       .setNegativeButton("No", new DialogInterface.OnClickListener() {
+		           public void onClick(DialogInterface dialog, int id) {
+		                dialog.cancel();
+		           }
+		       });
+		
+		newGame();
 	}
 	private int canvasCoord2ChessIndex(PointF point) {
 		Point logicPoint = new Point((int)((point.x - mLaticeLen2)/mLaticeLen), (int)((point.y - mLaticeLen2)/mLaticeLen));
@@ -58,9 +84,9 @@ public class ChessboardView extends ImageView{
 	private PointF chessIndex2CanvasCoord(int i) {
 		PointF point = new PointF(chessIndex2LogicPoint(i));
 		point.x *= mLaticeLen ;
-		point.x += mLaticeLen2;
+		point.x += mStartBoardX;
 		point.y *= mLaticeLen ;
-		point.y += mLaticeLen2;
+		point.y += mStartBoardY;
 		return point;
 	}
 	private Point chessIndex2LogicPoint(int i) {
@@ -70,14 +96,17 @@ public class ChessboardView extends ImageView{
 	@Override
 	protected void onDraw(Canvas canvas) {
 		if (mLaticeLen <0) {
+			// load chess images
+			Bitmap chessBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.qz);
 
-			mLaticeLen = getWidth()/9;
-			mChesslen = mLaticeLen * 19  / 20;
-			mLaticeLen2 = mLaticeLen/2;
-			mChessLen2 = mChesslen /2;
+			mLaticeLen = getWidth() * 35 /320.0f;
+			mChesslen = mLaticeLen * 19.0f  / 20;
+			mLaticeLen2 = mLaticeLen/2.0f;
+			mChessLen2 = mChesslen /2.0f;
 			
-	        // load chess images
-	        Bitmap chessBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.qz);
+			mStartBoardX = getWidth() * 20.0f / 320;
+			mStartBoardY = getHeight() * 20.0f /354;
+			
 	        int stepH = chessBitmap.getHeight() / 3;
 	        int stepW = chessBitmap.getWidth() / 14;
 	        for (int i = 0; i < 7; i++) {
@@ -102,9 +131,9 @@ public class ChessboardView extends ImageView{
 
 		// draw each chess
 		for(int i =0 ; i < AI.BOARD_SIZE ; i++) {
-			if (mAi.piece[i] != AI.EMPTY) {
+			if (mPieces[i] != AI.EMPTY) {
 				PointF point = chessIndex2CanvasCoord(i);
-				Bitmap bmp = mChessBitmaps[mAi.color[i]][mAi.piece[i]];
+				Bitmap bmp = mChessBitmaps[mColors[i]][mPieces[i]];
 				canvas.drawBitmap(bmp, null,new RectF(point.x - mChessLen2, point.y - mChessLen2, point.x + mChessLen2, point.y + mChessLen2), null);
 			}
 		}
@@ -125,11 +154,23 @@ public class ChessboardView extends ImageView{
 		mAi.init();
 		mChessFrom = -1;
 		mChessTo = -1;
+		mIsComputerThinking = false;
+
+		System.arraycopy(mAi.piece, 0, mPieces, 0, mPieces.length);
+		System.arraycopy(mAi.color, 0, mColors, 0, mColors.length);
+		postInvalidate();
 	}
 	
+	void saveGameStatus() {
+		
+	}
+	
+	void restoreGameStatus() {
+		
+	}
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
-		if (event.getAction() == MotionEvent.ACTION_DOWN) {
+		if (!mIsComputerThinking && event.getAction() == MotionEvent.ACTION_DOWN) {
 			final int chess = canvasCoord2ChessIndex(new PointF(event.getX(),event.getY()));
 			Log.d("lzj", "chess index clicked : "+ chess);
 			if (chess >0 ) {
@@ -137,41 +178,57 @@ public class ChessboardView extends ImageView{
 					if (mAi.color[chess] == USER_COLOR) {
 						mChessFrom = chess;
 						mChessTo = -1;
+						invalidate();
 					}
 				}else if( mChessFrom >= 0 && mChessTo < 0 && mAi.color[chess] == USER_COLOR){
 					mChessFrom = chess;
+					invalidate();
 				}else if (mChessTo < 0) {
 					Log.d("lzj", "second click, from: " + mChessFrom + ", to: "+chess);
 					//human move
-//					new Thread(new Runnable() {
-//						
-//						public void run() {
-							int ret = mAi.takeAMove(mChessFrom, chess);
-							if (ret == AI.MOVE_OK) {
-								Log.d("lzj", "human move ok");
-								mChessTo = chess;
-//								Message msg = mMessageHandler.obtainMessage(MSG_USER_MOVE_DONE);
-//								mMessageHandler.sendMessage(msg);
-								invalidate();
-								
-								// computer move 
-								ret = mAi.computerMove();
+					int ret = mAi.takeAMove(mChessFrom, chess);
+					if (ret == AI.MOVE_OK) {
+						Log.d("lzj", "human move ok");
+						mChessTo = chess;
+						System.arraycopy(mAi.piece, 0, mPieces, 0, mPieces.length);
+						System.arraycopy(mAi.color, 0, mColors, 0, mColors.length);
+						invalidate();
+
+						mIsComputerThinking = true;
+						new Thread(new Runnable() {
+						
+							public void run() {
+								// computer move
+								int ret = mAi.computerMove();
 								Move move = mAi.getComputerMove();
 								mChessFrom = move.from;
 								mChessTo = move.dest;
-								invalidate();
-//								msg = mMessageHandler.obtainMessage(MSG_COMPUTER_MOVE_DONE);
-//								mMessageHandler.sendMessage(msg);
-							}else if (ret == AI.MOVE_WIN) {
-								// show dialog
+								System.arraycopy(mAi.piece, 0, mPieces, 0, mPieces.length);
+								System.arraycopy(mAi.color, 0, mColors, 0, mColors.length);
+								postInvalidate();								
+								mIsComputerThinking = false;
 								
+								if (ret == AI.MOVE_WIN) {
+									mAlertDialogBuilder
+											.setMessage(getResources()
+													.getString(
+															R.string.computer_win));
+									AlertDialog alert = mAlertDialogBuilder
+											.create();
+									alert.show();
+								}
 							}
-							Log.d("lzj","takeAMove ret : " + ret);
+						}).start();
+					} else if (ret == AI.MOVE_WIN) {
+						// show dialog
+						mAlertDialogBuilder.setMessage(getResources()
+								.getString(R.string.user_win));
+						AlertDialog alert = mAlertDialogBuilder.create();
+						alert.show();
+					}
+					Log.d("lzj", "takeAMove ret : " + ret);
 							
-//						}
-//					}).start();
 				}
-				postInvalidate();
 			}
 		}
 		return super.onTouchEvent(event);
@@ -181,10 +238,9 @@ public class ChessboardView extends ImageView{
     		Log.d("lzj", "message hander : msg.what = " + msg.what);
     		switch (msg.what) {
     		case MSG_USER_MOVE_DONE:
-				postInvalidate();
+				invalidate();
     			break;
     		case MSG_COMPUTER_MOVE_DONE:
-    			postInvalidate();
     			break;    			
 			default:
 				break;
