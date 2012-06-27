@@ -2,7 +2,6 @@ package com.onezeros.chinesechess;
 
 
 import com.android.chinesechess.R;
-import com.onezeros.chinesechess.AI.Move;
 
 import android.app.AlertDialog;
 import android.content.Context;
@@ -13,6 +12,7 @@ import android.graphics.Canvas;
 import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.RectF;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.AttributeSet;
@@ -161,13 +161,19 @@ public class ChessboardView extends ImageView{
 		postInvalidate();
 	}
 	
-	void saveGameStatus() {
+	void saveGameStatus(Bundle outInstanceState) {
+		mAi.saveStatus(outInstanceState);
+		outInstanceState.putInt("mChessFrom", mChessFrom);
+		outInstanceState.putInt("mChessFrom", mChessTo);
 		
 	}
 	
-	void restoreGameStatus() {
-		
+	void restoreGameStatus(Bundle savedInstanceState) {
+		mAi.restoreStatus(savedInstanceState);
+		mChessFrom = savedInstanceState.getInt("mChessFrom");
+		mChessTo = savedInstanceState.getInt("mChessTo");
 	}
+	
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
 		if (!mIsComputerThinking && event.getAction() == MotionEvent.ACTION_DOWN) {

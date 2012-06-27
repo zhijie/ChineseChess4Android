@@ -1,5 +1,13 @@
 package com.onezeros.chinesechess;
 
+import java.io.Serializable;
+
+import android.R.integer;
+import android.bluetooth.BluetoothA2dp;
+import android.os.Bundle;
+import android.os.Parcel;
+import android.os.Parcelable;
+
 /**
  * algorithm from feiyan
  * @author onezeros
@@ -36,27 +44,9 @@ public class AI {
 	public static final int MOVE_INVALID = 2;
 	public static final int MOVE_OK = 3;
 
-	class Move {
-		public int from;
-		public int dest;
-	};
 
-	class Recorder {
-		public Move m ;
-		public Recorder() {
-			m = new Move();
-		}
-		
-	};
 
-	class History {
-		public Move m ;
-		public int capture;
 
-		public History() {
-			m = new Move();
-		}
-	} ;
 	
 	/* the board representation && the initial board state */
 	// 0, 1,represent for both sides
@@ -76,6 +66,41 @@ public class AI {
 	int hdp;
 
 
+	public void saveStatus(Bundle outStatus) {
+		outStatus.putIntArray("color", color);
+		outStatus.putIntArray("piece", piece);
+		outStatus.putInt("nodecount", nodecount);
+		outStatus.putInt("brandtotal", brandtotal);
+		outStatus.putInt("gencount", gencount);
+		outStatus.putInt("ply", ply);
+		outStatus.putInt("side", side);
+		outStatus.putInt("xside", xside);
+		outStatus.putInt("computerside", computerside);
+		outStatus.putParcelable("newmove", newmove);
+		outStatus.putParcelableArray("gen_dat", gen_dat);
+		outStatus.putIntArray("gen_begin", gen_begin);
+		outStatus.putIntArray("gen_end", gen_end);
+		outStatus.putParcelableArray("hist_dat", hist_dat);
+		outStatus.putInt("hdp", hdp);
+	}
+	
+	public void restoreStatus(Bundle inStatus) {
+		color = inStatus.getIntArray("color");
+		piece = inStatus.getIntArray("piece");
+		nodecount = inStatus.getInt("nodecount");
+		brandtotal = inStatus.getInt("brandtotal");
+		gencount = inStatus.getInt("gencount");
+		ply = inStatus.getInt("ply");
+		side = inStatus.getInt("side");
+		xside = inStatus.getInt("xside");
+		computerside = inStatus.getInt("computerside");
+		newmove = inStatus.getParcelable("newmove");
+		gen_dat = (Recorder[]) inStatus.getParcelableArray("gen_dat");
+		gen_begin = inStatus.getIntArray("gen_begin");
+		gen_end = inStatus.getIntArray("gen_end");
+		hist_dat = (History[]) inStatus.getParcelableArray("hist_dat");
+		hdp = inStatus.getInt("hdp");
+	}
 	/**** MOVE GENERATE ****/
 	//[7][8] possible positions offset
 	final int[][] offset = {
@@ -384,3 +409,83 @@ public class AI {
 		return newmove;
 	}
 }
+
+class Move implements Parcelable{
+	public int from;
+	public int dest;
+	public int describeContents() {
+		return 0;
+	}
+	public void writeToParcel(Parcel dest, int flags) {
+		dest.writeInt(from);
+		dest.writeInt(this.dest);
+	}
+
+	public static final Parcelable.Creator<Move> CREATOR = new Parcelable.Creator<Move>() {
+		public Move createFromParcel(Parcel in) {
+			Move move = new Move();
+			move.from = in.readInt();
+			move.dest = in.readInt();
+			return move;
+		}
+
+		public Move[] newArray(int size) {
+			return new Move[size];
+		}
+	};
+};
+
+class Recorder implements Parcelable{
+	public Move m ;
+	public Recorder() {
+		m = new Move();
+	}
+	public int describeContents() {
+		return 0;
+	}
+	public void writeToParcel(Parcel dest, int flags) {
+		dest.writeParcelable(m, 0);
+	}
+	public static final Parcelable.Creator<Recorder> CREATOR = new Parcelable.Creator<Recorder>() {
+		public Recorder createFromParcel(Parcel in) {
+			Recorder recorder = new Recorder();
+			recorder.m = in.readParcelable(null);
+			return recorder;
+		}
+
+		public Recorder[] newArray(int size) {
+			return new Recorder[size];
+		}
+	};
+};
+
+class History implements Parcelable{
+	public Move m ;
+	public int capture;
+
+	public History() {
+		m = new Move();
+	}
+
+	public int describeContents() {
+		return 0;
+	}
+
+	public void writeToParcel(Parcel dest, int flags) {
+		dest.writeParcelable(m, 0);
+		dest.writeInt(capture);
+	}
+	
+	public static final Parcelable.Creator<History> CREATOR = new Parcelable.Creator<History>() {
+		public History createFromParcel(Parcel in) {
+			History history = new History();
+			history.m = in.readParcelable(null);
+			history.capture = in.readInt();
+			return history;
+		}
+
+		public History[] newArray(int size) {
+			return new History[size];
+		}
+	};
+} ;
