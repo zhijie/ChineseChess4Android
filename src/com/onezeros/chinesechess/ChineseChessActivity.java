@@ -24,27 +24,18 @@ public class ChineseChessActivity extends Activity {
         layout.addView(adView);
     }
 
-	@Override
-	protected void onRestoreInstanceState(Bundle savedInstanceState) {
-		super.onRestoreInstanceState(savedInstanceState);
-		//mChessboardView.saveGameStatus(savedInstanceState);
-	}
-
-	@Override
-	protected void onSaveInstanceState(Bundle outState) {
-		super.onSaveInstanceState(outState);
-		//mChessboardView.restoreGameStatus(outState);
-	}
 
 	@Override
 	protected void onPause() {
 		super.onPause();
-		MobclickAgent.onResume(this);
+		MobclickAgent.onPause(this);
+		mChessboardView.saveGameStatus();
 	}
 
 	@Override
 	protected void onResume() {		
 		super.onResume();
-		MobclickAgent.onPause(this);
+		MobclickAgent.onResume(this);
+		mChessboardView.restoreGameStatus();
 	}
 }

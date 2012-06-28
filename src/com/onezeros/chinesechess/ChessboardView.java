@@ -1,8 +1,15 @@
 package com.onezeros.chinesechess;
 
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+
 import com.android.chinesechess.R;
 
+import android.R.integer;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -15,6 +22,7 @@ import android.graphics.RectF;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.os.Parcel;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -24,6 +32,9 @@ public class ChessboardView extends ImageView{
 	static final int USER_COLOR = AI.LIGHT;
 	static final int MSG_USER_MOVE_DONE = 0;
 	static final int MSG_COMPUTER_MOVE_DONE = 1;
+	static final int MSG_COMPUTER_WIN = 2;
+	static final int MSG_USER_WIN = 3;
+	static final String SAVE_STATE_FILE_NAME = "bundledata.txt";
 	
 	Bitmap[][] mChessBitmaps = new Bitmap[2][7];
 	Bitmap mSelectBitmap = null;
@@ -161,17 +172,64 @@ public class ChessboardView extends ImageView{
 		postInvalidate();
 	}
 	
-	void saveGameStatus(Bundle outInstanceState) {
+	void saveGameStatus() {
+		Bundle outInstanceState = new Bundle();
 		mAi.saveStatus(outInstanceState);
 		outInstanceState.putInt("mChessFrom", mChessFrom);
-		outInstanceState.putInt("mChessFrom", mChessTo);
+		outInstanceState.putInt("mChessTo", mChessTo);
+		// write bundle to file
+		try {
+
+//			File file = new File(SAVE_STATE_FILE_NAME);
+//			FileOutputStream fos = new FileOutputStream(file);
+			FileOutputStream fos = mContext.openFileOutput(SAVE_STATE_FILE_NAME, Context.MODE_PRIVATE);
+			Parcel parcel = Parcel.obtain();
+			outInstanceState.writeToParcel(parcel, 0);
+			fos.write(parcel.marshall());
+			fos.flush();
+			fos.close();
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
 	}
 	
-	void restoreGameStatus(Bundle savedInstanceState) {
-		mAi.restoreStatus(savedInstanceState);
-		mChessFrom = savedInstanceState.getInt("mChessFrom");
-		mChessTo = savedInstanceState.getInt("mChessTo");
+	void restoreGameStatus() {
+		// read from file
+		try {
+//			File file = new File(SAVE_STATE_FILE_NAME);
+//			FileInputStream fis = new FileInputStream(file);
+			FileInputStream fis = mContext.openFileInput(SAVE_STATE_FILE_NAME);
+			byte[] data = new byte[700000];// should big enough
+			int datalength = fis.read(data);
+			Log.d("lzj", "datalength = " +datalength);
+			if (fis.read(data) != -1) {
+				Log.e("lzj", "error: should make buffer bigger");
+				return;
+			}
+			fis.close();
+			
+			Parcel parcel = Parcel.obtain(); 
+			parcel.unmarshall(data, 0, datalength);			
+			Bundle savedInstanceState = Bundle.CREATOR.createFromParcel(parcel);
+			
+			mAi.restoreStatus(savedInstanceState);
+			mChessFrom = savedInstanceState.getInt("mChessFrom");
+			mChessTo = savedInstanceState.getInt("mChessTo");
+			System.arraycopy(mAi.piece, 0, mPieces, 0, mPieces.length);
+			System.arraycopy(mAi.color, 0, mColors, 0, mColors.length);
+			mIsComputerThinking = false;
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	@Override
@@ -215,22 +273,14 @@ public class ChessboardView extends ImageView{
 								mIsComputerThinking = false;
 								
 								if (ret == AI.MOVE_WIN) {
-									mAlertDialogBuilder
-											.setMessage(getResources()
-													.getString(
-															R.string.computer_win));
-									AlertDialog alert = mAlertDialogBuilder
-											.create();
-									alert.show();
+									Message msg = mMessageHandler.obtainMessage(MSG_COMPUTER_WIN);
+									mMessageHandler.sendMessage(msg);
 								}
 							}
 						}).start();
 					} else if (ret == AI.MOVE_WIN) {
-						// show dialog
-						mAlertDialogBuilder.setMessage(getResources()
-								.getString(R.string.user_win));
-						AlertDialog alert = mAlertDialogBuilder.create();
-						alert.show();
+						Message msg = mMessageHandler.obtainMessage(MSG_USER_WIN);
+						mMessageHandler.sendMessage(msg);
 					}
 					Log.d("lzj", "takeAMove ret : " + ret);
 							
@@ -244,10 +294,18 @@ public class ChessboardView extends ImageView{
     		Log.d("lzj", "message hander : msg.what = " + msg.what);
     		switch (msg.what) {
     		case MSG_USER_MOVE_DONE:
-				invalidate();
     			break;
     		case MSG_COMPUTER_MOVE_DONE:
-    			break;    			
+    			break;
+    		case MSG_COMPUTER_WIN:
+				mAlertDialogBuilder.setMessage(getResources().getString(R.string.computer_win));
+				mAlertDialogBuilder.create().show();
+    			break;
+    		case MSG_USER_WIN:
+				mAlertDialogBuilder.setMessage(getResources()
+						.getString(R.string.user_win));
+				mAlertDialogBuilder.create().show();
+    			break;
 			default:
 				break;
 			}
