@@ -1,6 +1,9 @@
 package com.onezeros.chinesechess;
 
 
+import java.io.BufferedOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -173,20 +176,19 @@ public class ChessboardView extends ImageView{
 	}
 	
 	void saveGameStatus() {
-		Bundle outInstanceState = new Bundle();
-		mAi.saveStatus(outInstanceState);
-		outInstanceState.putInt("mChessFrom", mChessFrom);
-		outInstanceState.putInt("mChessTo", mChessTo);
-		// write bundle to file
 		try {
 
 //			File file = new File(SAVE_STATE_FILE_NAME);
 //			FileOutputStream fos = new FileOutputStream(file);
 			FileOutputStream fos = mContext.openFileOutput(SAVE_STATE_FILE_NAME, Context.MODE_PRIVATE);
-			Parcel parcel = Parcel.obtain();
-			outInstanceState.writeToParcel(parcel, 0);
-			fos.write(parcel.marshall());
-			fos.flush();
+			DataOutputStream dos = new DataOutputStream(fos);
+			
+			dos.writeInt(mChessFrom);
+			dos.writeInt(mChessTo);
+
+			mAi.saveStatus(dos);
+			
+			dos.close();
 			fos.close();
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
@@ -199,27 +201,17 @@ public class ChessboardView extends ImageView{
 	}
 	
 	void restoreGameStatus() {
-		// read from file
 		try {
 //			File file = new File(SAVE_STATE_FILE_NAME);
-//			FileInputStream fis = new FileInputStream(file);
+//			FileInputStream fis = new FileInputStream(file);			
 			FileInputStream fis = mContext.openFileInput(SAVE_STATE_FILE_NAME);
-			byte[] data = new byte[700000];// should big enough
-			int datalength = fis.read(data);
-			Log.d("lzj", "datalength = " +datalength);
-			if (fis.read(data) != -1) {
-				Log.e("lzj", "error: should make buffer bigger");
-				return;
-			}
-			fis.close();
+			DataInputStream dis = new DataInputStream(fis);
+
+			mChessFrom = dis.readInt();
+			mChessTo = dis.readInt();
 			
-			Parcel parcel = Parcel.obtain(); 
-			parcel.unmarshall(data, 0, datalength);			
-			Bundle savedInstanceState = Bundle.CREATOR.createFromParcel(parcel);
+			mAi.restoreStatus(dis);
 			
-			mAi.restoreStatus(savedInstanceState);
-			mChessFrom = savedInstanceState.getInt("mChessFrom");
-			mChessTo = savedInstanceState.getInt("mChessTo");
 			System.arraycopy(mAi.piece, 0, mPieces, 0, mPieces.length);
 			System.arraycopy(mAi.color, 0, mColors, 0, mColors.length);
 			mIsComputerThinking = false;
