@@ -4,4 +4,6 @@
     <string name="app_name">中国象棋</string>
 	<string name="computer_win">哈哈，我赢了。还敢再玩儿吗？</string>
 	<string name="user_win">算你运气好，下次就不一定了。敢再来一局吗？</string>
+	<string name="new_game">新游戏</string>
+    <string name="restore_game">继续游戏</string>
 </resources>

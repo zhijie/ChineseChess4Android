@@ -209,9 +209,9 @@ public class ChessboardView extends ImageView{
 
 			mChessFrom = dis.readInt();
 			mChessTo = dis.readInt();
-			
+
 			mAi.restoreStatus(dis);
-			
+
 			System.arraycopy(mAi.piece, 0, mPieces, 0, mPieces.length);
 			System.arraycopy(mAi.color, 0, mColors, 0, mColors.length);
 			mIsComputerThinking = false;

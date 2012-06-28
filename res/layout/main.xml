@@ -1,19 +1,48 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-    android:orientation="vertical" >
-
-<com.onezeros.chinesechess.ChessboardView android:id="@+id/chessboard"
-    android:layout_width="fill_parent"
-    android:layout_height="wrap_content"
-    android:layout_gravity="center"
-    android:background="@drawable/qp1"/>
-
-<LinearLayout 
-    android:id="@+id/AdLinearLayout" 
     android:layout_width="fill_parent" 
-    android:layout_height="wrap_content"
-    android:gravity="center_horizontal|bottom"/>
+    android:layout_height="fill_parent" > 
 
+    
+    <RelativeLayout android:id="@+id/mainview"
+	    android:layout_width="fill_parent"
+	    android:layout_height="fill_parent"
+	    android:orientation="vertical" 
+	    android:visibility="invisible">
+
+		<LinearLayout 
+		    android:id="@+id/AdLinearLayout" 
+		    android:layout_width="fill_parent" 
+		    android:layout_height="wrap_content"
+		    android:gravity="top"/>
+		
+		<com.onezeros.chinesechess.ChessboardView android:id="@+id/chessboard"
+		    android:layout_width="fill_parent"
+		    android:layout_height="wrap_content"
+		    android:layout_below="@id/AdLinearLayout"
+		    android:background="@drawable/qp1"/>
+	
+    </RelativeLayout>
+
+    <LinearLayout android:id="@+id/menu_view"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent" 
+        android:background="@drawable/menubg"
+        android:orientation="vertical">
+        <Button android:id="@+id/new_game_btn"
+            android:layout_width = "fill_parent"
+            android:layout_height="wrap_content" 
+            android:text="@string/new_game"
+            android:layout_marginTop="100dip"
+            android:layout_marginLeft="50dip"
+            android:layout_marginRight="50dip"/>
+        <Button android:id="@+id/restore_game_btn"
+            android:layout_width = "fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="50dip"
+            android:layout_marginRight="50dip"
+            android:text="@string/restore_game"/>
+    </LinearLayout>
+    
 </FrameLayout>
