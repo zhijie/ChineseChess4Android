@@ -6,4 +6,7 @@
 	<string name="user_win">算你运气好，下次就不一定了。敢再来一局吗？</string>
 	<string name="new_game">新游戏</string>
     <string name="restore_game">继续游戏</string>
+	<string name="welcome">亲，终于回来了，想死我了</string>
+	<string name="user_move">动手吧~~~</string>
+	<string name="computer_move">让我想想。。。</string>
 </resources>

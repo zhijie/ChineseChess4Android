@@ -11,17 +11,26 @@
 	    android:orientation="vertical" 
 	    android:visibility="invisible">
 
+		<com.onezeros.chinesechess.ChessboardView android:id="@+id/chessboard"
+		    android:layout_width="fill_parent"
+		    android:layout_height="wrap_content"
+		    android:background="@drawable/qp1"
+		    android:layout_centerInParent="true"/>
+        
+		<TextView android:id="@+id/info_tv"
+		    android:layout_above="@id/chessboard"
+		    android:layout_width="wrap_content"
+		    android:layout_height="wrap_content"
+		    android:layout_alignParentRight="true"
+		    android:layout_marginRight="12dip"
+		    android:layout_marginBottom="8dip"
+		    android:textSize="15dip"/>
+		
 		<LinearLayout 
 		    android:id="@+id/AdLinearLayout" 
 		    android:layout_width="fill_parent" 
 		    android:layout_height="wrap_content"
-		    android:gravity="top"/>
-		
-		<com.onezeros.chinesechess.ChessboardView android:id="@+id/chessboard"
-		    android:layout_width="fill_parent"
-		    android:layout_height="wrap_content"
-		    android:layout_below="@id/AdLinearLayout"
-		    android:background="@drawable/qp1"/>
+		    android:layout_below="@id/chessboard"/>
 	
     </RelativeLayout>
 

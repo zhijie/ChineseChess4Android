@@ -5,4 +5,7 @@
 	<string name="user_win">You are really lucky, dare to try again ?</string>
 	<string name="new_game">New Game</string>
 	<string name="restore_game">Continue</string>
+	<string name="welcome">Hello</string>
+	<string name="user_move">Please move your chess.</string>
+	<string name="computer_move">Let me have a look.</string>
 </resources>

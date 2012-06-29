@@ -12,6 +12,7 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 public class ChineseChessActivity extends Activity {
 	ChessboardView mChessboardView;
@@ -19,7 +20,7 @@ public class ChineseChessActivity extends Activity {
 	LinearLayout mMenuLayout;
 	Button mNewGameButton;
 	Button mContinueButton;
-	
+	TextView mInfoTextView;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -31,6 +32,9 @@ public class ChineseChessActivity extends Activity {
         mContinueButton = (Button)findViewById(R.id.restore_game_btn);
         
         mChessboardView = (ChessboardView)findViewById(R.id.chessboard);
+        
+        mInfoTextView = (TextView)findViewById(R.id.info_tv);
+        mChessboardView.setInfoTextview(mInfoTextView);
         
         mNewGameButton.setOnClickListener(new OnClickListener() {
 			
@@ -66,8 +70,9 @@ public class ChineseChessActivity extends Activity {
 	public void onBackPressed() {
 		if (mMainLayout.getVisibility() == View.VISIBLE) {
 			switchViewTo(mMenuLayout);
+		}else {
+			super.onBackPressed();
 		}
-		super.onBackPressed();
 	}
 
 	@Override

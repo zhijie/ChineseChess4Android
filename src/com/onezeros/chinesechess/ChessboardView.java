@@ -1,10 +1,8 @@
 package com.onezeros.chinesechess;
 
 
-import java.io.BufferedOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -12,7 +10,6 @@ import java.io.IOException;
 
 import com.android.chinesechess.R;
 
-import android.R.integer;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -22,14 +19,16 @@ import android.graphics.Canvas;
 import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.RectF;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.os.Parcel;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.MotionEvent;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 public class ChessboardView extends ImageView{
 	static final int USER_COLOR = AI.LIGHT;
@@ -58,7 +57,10 @@ public class ChessboardView extends ImageView{
 	MessageHandler mMessageHandler = new MessageHandler();
 	Context mContext;
 	AlertDialog.Builder mAlertDialogBuilder;
-
+	TextView mInfoTextView;
+	
+	boolean mIsFirstEnter
+	
 	public ChessboardView(Context context, AttributeSet attrs) {
 		super(context, attrs);
 		init(context);
@@ -69,8 +71,13 @@ public class ChessboardView extends ImageView{
 		init(context);
 	}
 
+	public void setInfoTextview(TextView tv) {
+		mInfoTextView = tv;
+	}
+	
 	void init(Context context){
 		mContext = context;
+		
 		
 		mAlertDialogBuilder = new AlertDialog.Builder(mContext);
 		mAlertDialogBuilder.setCancelable(false)
@@ -84,9 +91,8 @@ public class ChessboardView extends ImageView{
 		                dialog.cancel();
 		           }
 		       });
-		
-		newGame();
 	}
+	
 	private int canvasCoord2ChessIndex(PointF point) {
 		Point logicPoint = new Point((int)((point.x - mLaticeLen2)/mLaticeLen), (int)((point.y - mLaticeLen2)/mLaticeLen));
 		int index =logicPoint.x + logicPoint.y * 9;
@@ -172,6 +178,7 @@ public class ChessboardView extends ImageView{
 
 		System.arraycopy(mAi.piece, 0, mPieces, 0, mPieces.length);
 		System.arraycopy(mAi.color, 0, mColors, 0, mColors.length);
+		mInfoTextView.setText(getResources().getString(R.string.welcome));
 		postInvalidate();
 	}
 	
@@ -251,6 +258,7 @@ public class ChessboardView extends ImageView{
 						invalidate();
 
 						mIsComputerThinking = true;
+						mInfoTextView.setText(getResources().getString(R.string.computer_move));
 						new Thread(new Runnable() {
 						
 							public void run() {
@@ -264,8 +272,11 @@ public class ChessboardView extends ImageView{
 								postInvalidate();								
 								mIsComputerThinking = false;
 								
+								Message msg = mMessageHandler.obtainMessage(MSG_COMPUTER_MOVE_DONE);
+								mMessageHandler.sendMessage(msg);
+								
 								if (ret == AI.MOVE_WIN) {
-									Message msg = mMessageHandler.obtainMessage(MSG_COMPUTER_WIN);
+									msg = mMessageHandler.obtainMessage(MSG_COMPUTER_WIN);
 									mMessageHandler.sendMessage(msg);
 								}
 							}
@@ -288,6 +299,8 @@ public class ChessboardView extends ImageView{
     		case MSG_USER_MOVE_DONE:
     			break;
     		case MSG_COMPUTER_MOVE_DONE:
+    			invalidate();
+    			mInfoTextView.setText(getResources().getString(R.string.user_move));
     			break;
     		case MSG_COMPUTER_WIN:
 				mAlertDialogBuilder.setMessage(getResources().getString(R.string.computer_win));
