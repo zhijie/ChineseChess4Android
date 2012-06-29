@@ -59,7 +59,6 @@ public class ChessboardView extends ImageView{
 	AlertDialog.Builder mAlertDialogBuilder;
 	TextView mInfoTextView;
 	
-	boolean mIsFirstEnter
 	
 	public ChessboardView(Context context, AttributeSet attrs) {
 		super(context, attrs);

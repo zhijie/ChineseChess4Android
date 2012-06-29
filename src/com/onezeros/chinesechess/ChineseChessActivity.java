@@ -21,6 +21,8 @@ public class ChineseChessActivity extends Activity {
 	Button mNewGameButton;
 	Button mContinueButton;
 	TextView mInfoTextView;
+	boolean mIsUIStart = true;
+	
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -41,13 +43,18 @@ public class ChineseChessActivity extends Activity {
 			public void onClick(View v) {
 				mChessboardView.newGame();
 				switchViewTo(mMainLayout);
+				mIsUIStart = false;
+						
 			}
 		});
         mContinueButton.setOnClickListener(new OnClickListener() {
 			
 			public void onClick(View v) {
-				mChessboardView.restoreGameStatus();
+				if (mIsUIStart) {
+					mChessboardView.restoreGameStatus();
+				}
 				switchViewTo(mMainLayout);
+				mIsUIStart = false;
 			}
 		});
         
