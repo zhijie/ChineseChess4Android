@@ -44,12 +44,12 @@
             android:layout_height="wrap_content" 
             android:text="@string/new_game"
             android:layout_marginTop="100dip"
-            android:layout_marginLeft="50dip"
+            android:layout_marginLeft="100dip"
             android:layout_marginRight="50dip"/>
         <Button android:id="@+id/restore_game_btn"
             android:layout_width = "fill_parent"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="50dip"
+            android:layout_marginLeft="100dip"
             android:layout_marginRight="50dip"
             android:text="@string/restore_game"/>
     </LinearLayout>

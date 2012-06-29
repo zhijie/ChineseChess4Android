@@ -44,7 +44,6 @@ public class ChineseChessActivity extends Activity {
 				mChessboardView.newGame();
 				switchViewTo(mMainLayout);
 				mIsUIStart = false;
-						
 			}
 		});
         mContinueButton.setOnClickListener(new OnClickListener() {

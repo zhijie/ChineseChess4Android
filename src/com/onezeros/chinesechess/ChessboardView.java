@@ -93,7 +93,7 @@ public class ChessboardView extends ImageView{
 	}
 	
 	private int canvasCoord2ChessIndex(PointF point) {
-		Point logicPoint = new Point((int)((point.x - mLaticeLen2)/mLaticeLen), (int)((point.y - mLaticeLen2)/mLaticeLen));
+		Point logicPoint = new Point((int)((point.x - mStartBoardX + mLaticeLen2)/mLaticeLen), (int)((point.y - mStartBoardY +mLaticeLen2)/mLaticeLen));
 		int index =logicPoint.x + logicPoint.y * 9;
 		if (index >= AI.BOARD_SIZE || index < 0) {
 			return -1;
@@ -222,10 +222,10 @@ public class ChessboardView extends ImageView{
 			System.arraycopy(mAi.color, 0, mColors, 0, mColors.length);
 			mIsComputerThinking = false;
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
+			newGame();
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			newGame();
 			e.printStackTrace();
 		}
 	}
