@@ -7,6 +7,6 @@
 	<string name="new_game">新游戏</string>
     <string name="restore_game">继续游戏</string>
 	<string name="welcome">亲，终于回来了，想死我了</string>
-	<string name="user_move">动手吧~~~</string>
-	<string name="computer_move">让我想想。。。</string>
+	<string name="user_move">该你动手啦~~~</string>
+	<string name="computer_move">给点儿时间让我想想。。。</string>
 </resources>

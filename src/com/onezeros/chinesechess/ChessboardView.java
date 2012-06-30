@@ -285,7 +285,6 @@ public class ChessboardView extends ImageView{
 						mMessageHandler.sendMessage(msg);
 					}
 					Log.d("lzj", "takeAMove ret : " + ret);
-							
 				}
 			}
 		}
