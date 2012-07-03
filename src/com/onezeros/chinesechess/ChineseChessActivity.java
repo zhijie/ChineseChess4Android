@@ -1,6 +1,7 @@
 package com.onezeros.chinesechess;
 
 import cn.domob.android.ads.DomobAdView;
+import cn.domob.android.ads.DomobUpdater;
 
 import com.android.chinesechess.R;
 import com.umeng.analytics.MobclickAgent;
@@ -15,6 +16,8 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 public class ChineseChessActivity extends Activity {
+	public static final String DOMOB_PUBLISHER_ID_STRING = "56OJyOeouMzH2P6sIM";
+	
 	ChessboardView mChessboardView;
 	RelativeLayout mMainLayout;
 	LinearLayout mMenuLayout;
@@ -59,8 +62,10 @@ public class ChineseChessActivity extends Activity {
         
         // domob ad
         LinearLayout layout = (LinearLayout)findViewById(R.id.AdLinearLayout);
-        DomobAdView adView = new DomobAdView(this,"56OJyOeouMzH2P6sIM",DomobAdView.INLINE_SIZE_320X50);
+        DomobAdView adView = new DomobAdView(this,DOMOB_PUBLISHER_ID_STRING,DomobAdView.INLINE_SIZE_320X50);
         layout.addView(adView);
+        
+        DomobUpdater.checkUpdate(this, DOMOB_PUBLISHER_ID_STRING);
     }
 
     void switchViewTo(View v) {
