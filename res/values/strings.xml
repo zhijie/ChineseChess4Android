@@ -8,4 +8,7 @@
 	<string name="welcome">Hello</string>
 	<string name="user_move">Your turn.</string>
 	<string name="computer_move">Let me have a look.</string>
+    <string name="level1">level LOW</string>
+    <string name="level2">level MIDDLE</string>
+    <string name="level3">level HIGH</string>
 </resources>

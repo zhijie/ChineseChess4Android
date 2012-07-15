@@ -18,7 +18,7 @@ import android.os.Parcelable;
  */
 
 public class AI {
-	public static final int MAX_PLY = 4;
+	private int MAX_PLY = 4;
 	public static final int SIZE_X = 9;
 	public static final int SIZE_Y = 10;
 	public static final int BOARD_SIZE = SIZE_X*SIZE_Y;
@@ -68,7 +68,10 @@ public class AI {
 	History[] hist_dat ;//history data
 	int hdp;
 
-
+	public void setSearchDepth(int depth) {		
+		MAX_PLY = depth > 4 ? 4:(depth < 2 ? 2 :depth);
+	}
+	
 	public void saveStatus(DataOutputStream dos) throws IOException {
 		for (int i = 0; i < color.length; i++) {
 			dos.writeInt(color[i]);
@@ -76,6 +79,7 @@ public class AI {
 		for (int i = 0; i < piece.length; i++) {
 			dos.writeInt(piece[i]);
 		}
+		dos.writeInt(MAX_PLY);
 		dos.writeInt(nodecount);
 		dos.writeInt(brandtotal);
 		dos.writeInt(gencount);
@@ -113,6 +117,7 @@ public class AI {
 		for (int i = 0; i < piece.length; i++) {
 			piece[i] = dis.readInt();
 		}
+		MAX_PLY = dis.readInt();
 		nodecount = dis.readInt();
 		brandtotal = dis.readInt();
 		gencount = dis.readInt();

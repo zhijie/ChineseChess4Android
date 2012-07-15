@@ -23,11 +23,8 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.MotionEvent;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 public class ChessboardView extends ImageView{
@@ -169,6 +166,9 @@ public class ChessboardView extends ImageView{
 		super.onDraw(canvas);
 	}
 
+	public void setAILevel(int depth) {
+		mAi.setSearchDepth(depth);
+	}
 	void newGame() {
 		mAi.init();
 		mChessFrom = -1;

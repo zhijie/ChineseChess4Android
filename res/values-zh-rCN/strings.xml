@@ -9,4 +9,9 @@
 	<string name="welcome">亲，终于回来了，想死我了</string>
 	<string name="user_move">该你动手啦~~~</string>
 	<string name="computer_move">给点儿时间让我想想。。。</string>
+	<string name="level1">初级</string>
+	<string name="level2">中级</string>
+	<string name="level3">高级</string>
+	<string name="about">中国象棋是一款简洁的益智游戏,程序界面简洁,人机对战,电脑智力水平分为三个等级，等级越高，运行时耗费的时间会稍长些。各个阶段的象棋爱好者都可以把玩儿哦.程序开源地址：https://github.com/zhijie/ChineseChess4Android</string>
+	<string name="about_title">关于</string>
 </resources>

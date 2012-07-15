@@ -7,7 +7,11 @@ import com.android.chinesechess.R;
 import com.umeng.analytics.MobclickAgent;
 
 import android.app.Activity;
+import android.app.Dialog;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -97,5 +101,39 @@ public class ChineseChessActivity extends Activity {
 	protected void onResume() {		
 		super.onResume();
 		MobclickAgent.onResume(this);
+	}
+    @Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		MenuInflater inflater = new MenuInflater(this);
+		inflater.inflate(R.menu.option_menu, menu);
+		return true;
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		
+		switch (item.getItemId()) {
+		case R.id.level1_menu:
+			mChessboardView.setAILevel(3);
+			mChessboardView.newGame();
+			break;
+		case R.id.level2_menu:
+			mChessboardView.setAILevel(4);
+			mChessboardView.newGame();
+			break;
+		case R.id.level3_menu:
+			mChessboardView.setAILevel(5);
+			mChessboardView.newGame();
+			break;
+		case R.id.about_menu:
+			Dialog dialog = new Dialog(this);
+			dialog.setContentView(R.layout.dialog);
+			dialog.setTitle(R.string.about);
+			dialog.show();
+			break;
+		default:
+			break;
+		}
+		return super.onOptionsItemSelected(item);
 	}
 }
