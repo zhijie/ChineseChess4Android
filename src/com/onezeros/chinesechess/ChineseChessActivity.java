@@ -128,7 +128,7 @@ public class ChineseChessActivity extends Activity {
 		case R.id.about_menu:
 			Dialog dialog = new Dialog(this);
 			dialog.setContentView(R.layout.dialog);
-			dialog.setTitle(R.string.about);
+			dialog.setTitle(R.string.about_title);
 			dialog.show();
 			break;
 		default:

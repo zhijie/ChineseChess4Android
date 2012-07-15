@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android" >
     <item android:id="@+id/level1_menu"
-        android:title="@string/level1" />"
+        android:title="@string/level1" />
     <item android:id="@+id/level2_menu"
-        android:title="@string/level2" />"
+        android:title="@string/level2" />
     <item android:id="@+id/level3_menu"
-        android:title="@string/level3" />"
+        android:title="@string/level3" />
     <item android:id="@+id/about_menu"
-        android:title="@string/about_title" />"
-        
+        android:title="@string/about_title" />
 </menu>
